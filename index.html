@@ -169,28 +169,17 @@
     </div>
 
     <script>
-      // Функция для проверки существования файлов приложения
-      async function checkAppFiles(appName) {
-        try {
-          const [ipaResponse, manifestResponse] = await Promise.all([
-            fetch(`apps/${appName}/app.ipa`, { method: "HEAD" }),
-            fetch(`apps/${appName}/manifest.plist`, { method: "HEAD" }),
-          ]);
-
-          return ipaResponse.ok && manifestResponse.ok;
-        } catch (error) {
-          console.error(`Ошибка при проверке файлов для ${appName}:`, error);
-          return false;
-        }
-      }
+      // URL Google Cloud Function
+      const CLOUD_FUNCTION_URL =
+        "https://us-central1-blottery.cloudfunctions.net/getApps";
 
       // Функция для создания элемента приложения
-      function createAppItem(appName) {
+      function createAppItem(app) {
         return `
           <div class="app-item">
-            <div class="app-name">${appName}</div>
+            <div class="app-name">${app.name}</div>
             <a
-              href="itms-services://?action=download-manifest&url=https://ruslantsitser.github.io/ios_ad_hoc_test/apps/${appName}/manifest.plist"
+              href="itms-services://?action=download-manifest&url=${app.manifestUrl}"
               class="install-btn"
             >
               Установить на iPhone
@@ -199,51 +188,25 @@
         `;
       }
 
-      // Функция для сканирования папки apps и поиска приложений
-      async function scanAppsDirectory() {
+      // Функция для загрузки приложений с Google Cloud Function
+      async function loadAppsFromCloudFunction() {
         const container = document.getElementById("apps-container");
 
         try {
-          // Список известных папок приложений (можно расширить)
-          const knownApps = [
-            "citylens_staging-2.0.1+16",
-            "citylens",
-            "maps",
-            "camera",
-            "chat",
-            "music",
-            "video",
-            "game",
-            "social",
-            "shop",
-            "bank",
-            "food",
-            "travel",
-            "fitness",
-            "weather",
-            "news",
-            "book",
-            "note",
-            "calendar",
-            "mail",
-          ];
+          const response = await fetch(CLOUD_FUNCTION_URL);
 
-          const availableApps = [];
-
-          // Проверяем каждое известное приложение
-          for (const appName of knownApps) {
-            const isAvailable = await checkAppFiles(appName);
-            if (isAvailable) {
-              availableApps.push(appName);
-            }
+          if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
           }
 
-          if (availableApps.length > 0) {
+          const data = await response.json();
+
+          if (data.success && data.apps.length > 0) {
             const appsList = document.createElement("div");
             appsList.className = "apps-list";
 
-            availableApps.forEach((appName) => {
-              appsList.innerHTML += createAppItem(appName);
+            data.apps.forEach((app) => {
+              appsList.innerHTML += createAppItem(app);
             });
 
             container.innerHTML = "";
@@ -260,7 +223,7 @@
       }
 
       // Загружаем приложения при загрузке страницы
-      document.addEventListener("DOMContentLoaded", scanAppsDirectory);
+      document.addEventListener("DOMContentLoaded", loadAppsFromCloudFunction);
     </script>
   </body>
 </html>
