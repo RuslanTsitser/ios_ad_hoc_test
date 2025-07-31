@@ -29,7 +29,7 @@
         box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
         padding: 40px;
         text-align: center;
-        max-width: 800px;
+        max-width: 600px;
         width: 100%;
       }
 
@@ -58,62 +58,35 @@
         font-size: 16px;
       }
 
-      .apps-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-        gap: 20px;
+      .apps-list {
         margin-bottom: 30px;
       }
 
-      .app-card {
+      .app-item {
         background: #f8f9fa;
         border-radius: 15px;
-        padding: 25px;
+        padding: 20px;
+        margin-bottom: 15px;
         text-align: center;
         border: 2px solid transparent;
         transition: all 0.3s ease;
       }
 
-      .app-card:hover {
+      .app-item:hover {
         border-color: #667eea;
         transform: translateY(-2px);
         box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
       }
 
-      .app-icon {
-        width: 60px;
-        height: 60px;
-        background: linear-gradient(135deg, #667eea, #764ba2);
-        border-radius: 15px;
-        margin: 0 auto 15px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 24px;
-        color: white;
-        font-weight: bold;
-      }
-
       .app-name {
-        font-size: 20px;
+        font-size: 18px;
         font-weight: 600;
-        margin-bottom: 10px;
+        margin-bottom: 15px;
         color: #333;
       }
 
-      .app-version {
-        background: #e3f2fd;
-        color: #1976d2;
-        padding: 6px 12px;
-        border-radius: 15px;
-        font-size: 12px;
-        font-weight: 600;
-        display: inline-block;
-        margin-bottom: 15px;
-      }
-
-      .download-btn {
-        background: linear-gradient(135deg, #667eea, #764ba2);
+      .install-btn {
+        background: linear-gradient(135deg, #28a745, #20c997);
         color: white;
         border: none;
         padding: 12px 24px;
@@ -124,17 +97,11 @@
         transition: all 0.3s ease;
         text-decoration: none;
         display: inline-block;
-        margin: 5px;
-        min-width: 120px;
       }
 
-      .download-btn:hover {
+      .install-btn:hover {
         transform: translateY(-2px);
-        box-shadow: 0 8px 16px rgba(102, 126, 234, 0.3);
-      }
-
-      .install-btn {
-        background: linear-gradient(135deg, #28a745, #20c997);
+        box-shadow: 0 8px 16px rgba(40, 167, 69, 0.3);
       }
 
       .info {
@@ -167,6 +134,15 @@
         color: #666;
         font-style: italic;
       }
+
+      .error {
+        text-align: center;
+        padding: 20px;
+        color: #dc3545;
+        background: #f8d7da;
+        border-radius: 10px;
+        margin: 20px 0;
+      }
     </style>
   </head>
   <body>
@@ -181,19 +157,9 @@
 
       <div class="info">
         <h3>Инструкция по установке:</h3>
-        <p>
-          <strong>Способ 1 - Установка через Safari (рекомендуется):</strong>
-        </p>
         <p>1. Нажмите "Установить на iPhone"</p>
         <p>2. Разрешите установку в Safari</p>
         <p>3. Приложение установится автоматически</p>
-
-        <p><strong>Способ 2 - Установка через компьютер:</strong></p>
-        <p>1. Скачайте файл .ipa</p>
-        <p>2. Откройте файл в iTunes или Finder</p>
-        <p>3. Подключите iPhone к компьютеру</p>
-        <p>4. Установите приложение через iTunes/Finder</p>
-
         <p>
           <strong>Примечание:</strong> Убедитесь, что ваш iPhone доверяет
           сертификату разработчика в Настройки > Основные > Управление
@@ -203,17 +169,6 @@
     </div>
 
     <script>
-      // Список приложений (можно расширить в будущем)
-      const apps = [
-        {
-          name: "citylens_staging-2.0.1+16",
-          displayName: "CityLens",
-          icon: "CL",
-          version: "2.0.1 (Build 16)",
-          bundleId: "ru.2gis.citylens-beta",
-        },
-      ];
-
       // Функция для проверки существования файлов приложения
       async function checkAppFiles(appName) {
         try {
@@ -229,53 +184,70 @@
         }
       }
 
-      // Функция для создания карточки приложения
-      function createAppCard(app) {
+      // Функция для создания элемента приложения
+      function createAppItem(appName) {
         return `
-          <div class="app-card">
-            <div class="app-icon">${app.icon}</div>
-            <div class="app-name">${app.displayName}</div>
-            <div class="app-version">Версия ${app.version}</div>
-            <div>
-              <a href="apps/${app.name}/app.ipa" class="download-btn" download>
-                Скачать .ipa
-              </a>
-              <a
-                href="itms-services://?action=download-manifest&url=https://ruslantsitser.github.io/ios_ad_hoc_test/apps/${app.name}/manifest.plist"
-                class="download-btn install-btn"
-              >
-                Установить на iPhone
-              </a>
-            </div>
+          <div class="app-item">
+            <div class="app-name">${appName}</div>
+            <a
+              href="itms-services://?action=download-manifest&url=https://ruslantsitser.github.io/ios_ad_hoc_test/apps/${appName}/manifest.plist"
+              class="install-btn"
+            >
+              Установить на iPhone
+            </a>
           </div>
         `;
       }
 
-      // Основная функция для загрузки приложений
-      async function loadApps() {
+      // Функция для сканирования папки apps и поиска приложений
+      async function scanAppsDirectory() {
         const container = document.getElementById("apps-container");
 
         try {
+          // Список известных папок приложений (можно расширить)
+          const knownApps = [
+            "citylens_staging-2.0.1+16",
+            "citylens",
+            "maps",
+            "camera",
+            "chat",
+            "music",
+            "video",
+            "game",
+            "social",
+            "shop",
+            "bank",
+            "food",
+            "travel",
+            "fitness",
+            "weather",
+            "news",
+            "book",
+            "note",
+            "calendar",
+            "mail",
+          ];
+
           const availableApps = [];
 
-          // Проверяем каждое приложение
-          for (const app of apps) {
-            const isAvailable = await checkAppFiles(app.name);
+          // Проверяем каждое известное приложение
+          for (const appName of knownApps) {
+            const isAvailable = await checkAppFiles(appName);
             if (isAvailable) {
-              availableApps.push(app);
+              availableApps.push(appName);
             }
           }
 
           if (availableApps.length > 0) {
-            const appsGrid = document.createElement("div");
-            appsGrid.className = "apps-grid";
+            const appsList = document.createElement("div");
+            appsList.className = "apps-list";
 
-            availableApps.forEach((app) => {
-              appsGrid.innerHTML += createAppCard(app);
+            availableApps.forEach((appName) => {
+              appsList.innerHTML += createAppItem(appName);
             });
 
             container.innerHTML = "";
-            container.appendChild(appsGrid);
+            container.appendChild(appsList);
           } else {
             container.innerHTML =
               '<div class="no-apps">Приложения не найдены</div>';
@@ -283,12 +255,12 @@
         } catch (error) {
           console.error("Ошибка при загрузке приложений:", error);
           container.innerHTML =
-            '<div class="no-apps">Ошибка при загрузке приложений</div>';
+            '<div class="error">Ошибка при загрузке приложений</div>';
         }
       }
 
       // Загружаем приложения при загрузке страницы
-      document.addEventListener("DOMContentLoaded", loadApps);
+      document.addEventListener("DOMContentLoaded", scanAppsDirectory);
     </script>
   </body>
 </html>
