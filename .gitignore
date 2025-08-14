@@ -22,4 +22,7 @@ Desktop.ini
 *.temp
 
 # Keep .ipa files (we want to include them)
-!*.ipa 
+!*.ipa
+
+# Exclude zip files (function deployment packages)
+*.zip 

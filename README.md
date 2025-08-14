@@ -4,7 +4,7 @@
 
 ## Структура проекта
 
-```
+```schema
 ios-ad-hoc/
 ├── index.html                    # Главная страница с динамической загрузкой приложений
 ├── apps/                         # Директория с приложениями
@@ -58,6 +58,47 @@ git push origin main
 
 После настройки ваша страница будет доступна по адресу:
 `https://YOUR_USERNAME.github.io/ios-ad-hoc/`
+
+## Развертывание функции в облаке
+
+### Подготовка функции
+
+Функция находится в директории `functions/` и содержит:
+
+- `index.js` - основной код функции
+- `package.json` - зависимости
+- `function.zip` - архив для развертывания (автоматически исключен из git)
+
+### Загрузка в Google Cloud Functions
+
+#### Установка Google Cloud CLI и настройка проекта (Шаги могут отличаться)
+
+```bash
+# macOS
+brew install google-cloud-sdk
+gcloud auth login
+gcloud config set project blottery
+```
+
+#### Развертывание функции
+
+```bash
+cd functions
+zip -r function.zip .
+gcloud functions deploy getApps \
+  --runtime nodejs18 \
+  --trigger-http \
+  --allow-unauthenticated \
+  --region us-central1 \
+  --source .
+```
+
+#### Проверка функции
+
+```bash
+gcloud functions describe getApps
+curl -X GET "https://us-central1-blottery.cloudfunctions.net/getApps" -H "Content-Type: application/json"
+```
 
 ## Особенности
 
